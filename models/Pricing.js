@@ -1,20 +1,32 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const pricingSchema = new mongoose.Schema({
-  type: {
+const pricingSchema = new Schema({
+  category: {
     type: String,
     required: true,
-    enum: ['economy', 'premium', 'suv']
+    enum: ['sedan', 'premiumSedan', 'suv', 'premiumSuv']
   },
-  rate: {
-    type: Number,
-    required: true
+  oneWay: {
+    ratePerKm: {
+      type: Number,
+      required: true
+    }
   },
-  fixedPrice: {
+  roundTrip: {
+    ratePerKm: {
+      type: Number,
+      required: true
+    },
+    discountPercentage: {
+      type: Number,
+      default: 0
+    }
+  },
+  baseFare: {
     type: Number,
-    required: true,
+    require: true,
     default: 0
   }
 });
 
-module.exports = mongoose.model('Pricing', pricingSchema, 'pricings');
+export default model('Pricing', pricingSchema, 'pricings');

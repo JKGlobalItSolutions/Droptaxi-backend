@@ -1,22 +1,40 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const routeSchema = new mongoose.Schema({
-  from: {
+const routeSchema = new Schema({
+  fromLocation: {
     type: String,
     required: true
   },
-  to: {
+  toLocation: {
     type: String,
     required: true
   },
-  time: {
-    type: String,
-    required: true
-  },
-  price: {
+  distanceKm: {
     type: Number,
     required: true
+  },
+  faresPerCategory: {
+    sedan: {
+      type: Number,
+      required: true
+    },
+    premiumSedan: {
+      type: Number,
+      required: true
+    },
+    suv: {
+      type: Number,
+      required: true
+    },
+    premiumSuv: {
+      type: Number,
+      required: true
+    }
+  },
+  estimatedTime: {
+    type: String,
+    default: ""
   }
 });
 
-module.exports = mongoose.model('Route', routeSchema, 'routes');
+export default model('Route', routeSchema, 'routes');
