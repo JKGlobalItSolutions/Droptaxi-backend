@@ -216,62 +216,11 @@ app.post("/api/booking", async (req, res) => {
       });
     }
 
-    // ✅ Brevo env check
-    if (!process.env.BREVO_USER || !process.env.BREVO_PASS) {
-      return res.status(500).json({
-        success: false,
-        message: "Email credentials not configured in production",
-      });
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS,
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-    });
-
-    const mailOptions = {
-      from: process.env.BREVO_USER, // ✅ FIXED TYPO HERE
-      to: "gokie210402@gmail.com",
-      subject: `New Taxi Booking from ${name}`,
-      html: `
-        <h2>New Booking Request</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Pickup:</strong> ${pickup}</p>
-        <p><strong>Drop:</strong> ${drop}</p>
-        <p><strong>Vehicle Type:</strong> ${vehicleType}</p>
-        <p><strong>Date:</strong> ${date}</p>
-        <p><strong>Distance:</strong> ${distance ?? "N/A"} km</p>
-        <p><strong>Calculated Price:</strong> ${calculatedPrice ?? "N/A"}</p>
-        <p><strong>Message:</strong> ${message || "N/A"}</p>
-      `,
-    };
-
-    // ✅ Fail-safe mail sending
-    try {
-      await transporter.sendMail(mailOptions);
-    } catch (mailError) {
-      console.error("❌ SMTP ERROR:", mailError);
-      return res.status(500).json({
-        success: false,
-        message: "Email service temporarily unavailable",
-      });
-    }
-
-    console.log("✅ Email sent successfully");
+    // Booking data logged; no email sending
 
     return res.json({
       success: true,
-      message: "Booking sent successfully",
+      message: "Booking saved successfully",
     });
   } catch (error) {
     console.error("❌ FULL Booking Error:", error);
@@ -292,7 +241,6 @@ app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
   console.log("✅ Pricing API aligned");
   console.log("✅ Routes API aligned");
-  console.log("✅ Booking API email wired");
+  console.log("✅ Booking API ready");
   console.log("✅ Distance API ready");
-  console.log("✅ BREVO_USER loaded:", !!process.env.BREVO_USER);
 });
