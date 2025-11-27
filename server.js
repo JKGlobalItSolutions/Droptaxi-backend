@@ -161,11 +161,15 @@ app.get("/api/test-email", async (req, res) => {
         user: process.env.BREVO_USER,
         pass: process.env.BREVO_PASS,
       },
+
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     });
 
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env.BREVO_USER,
       to: "gokie210402@gmail.com",
       subject: "SMTP Test",
       text: "Email test successful",
@@ -181,8 +185,8 @@ app.get("/api/test-email", async (req, res) => {
 app.post("/api/booking", async (req, res) => {
   try {
     console.log("RAW BODY =>", req.body, typeof req.body);
+
     if (!req.body) {
-      console.error("❌ req.body is undefined");
       return res.status(400).json({
         success: false,
         message: "Invalid JSON body or missing Content-Type",
@@ -204,7 +208,7 @@ app.post("/api/booking", async (req, res) => {
 
     console.log("📩 Incoming booking:", req.body);
 
-    // ✅ FIXED VALIDATION (distance & price optional)
+    // ✅ Required fields check
     if (!name || !email || !phone || !pickup || !drop || !vehicleType || !date) {
       return res.status(400).json({
         success: false,
@@ -212,25 +216,29 @@ app.post("/api/booking", async (req, res) => {
       });
     }
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    // ✅ Brevo env check
+    if (!process.env.BREVO_USER || !process.env.BREVO_PASS) {
       return res.status(500).json({
         success: false,
-        message: "Email credentials not configured",
+        message: "Email credentials not configured in production",
       });
     }
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // SSL
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.BREVO_USER,
+        pass: process.env.BREVO_PASS,
       },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     });
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: process.env.BREVO_USER, // ✅ FIXED TYPO HERE
       to: "gokie210402@gmail.com",
       subject: `New Taxi Booking from ${name}`,
       html: `
@@ -248,23 +256,32 @@ app.post("/api/booking", async (req, res) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    // ✅ Fail-safe mail sending
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (mailError) {
+      console.error("❌ SMTP ERROR:", mailError);
+      return res.status(500).json({
+        success: false,
+        message: "Email service temporarily unavailable",
+      });
+    }
 
     console.log("✅ Email sent successfully");
 
-    res.json({
+    return res.json({
       success: true,
       message: "Booking sent successfully",
     });
   } catch (error) {
-    console.error("❌ FULL Booking Error:", error);   // IMPORTANT
+    console.error("❌ FULL Booking Error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to send booking",
     });
   }
-
 });
+
 
 /* =========================================================
    SERVER START
@@ -277,4 +294,5 @@ app.listen(PORT, () => {
   console.log("✅ Routes API aligned");
   console.log("✅ Booking API email wired");
   console.log("✅ Distance API ready");
+  console.log("✅ BREVO_USER loaded:", !!process.env.BREVO_USER);
 });
