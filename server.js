@@ -3,9 +3,11 @@ import axios from "axios";
 import cors from "cors";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import jwt from "jsonwebtoken";
 import connectDB from "./config/db.js";
 import pricingRoutes from "./routes/pricing.js";
 import routeRoutes from "./routes/routes.js";
+import verifyAdmin from "./utils/verifyAdmin.js";
 
 dotenv.config();
 connectDB();
@@ -14,34 +16,97 @@ const app = express();
 
 // CORS
 const allowedOrigins = [
-  "https://jkglobalitsolutions.github.io",
-  "http://localhost:8080",
-  "http://localhost:3000"
+  "https://jkglobalitsolutions.github.io"
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  next();
+});
+
+app.use(cors({
+  origin: allowedOrigins
+}));
 
 // Handle preflight requests
-app.options("*", cors());
+// app.options("*", cors({ origin: allowedOrigins }));
 
 app.use(express.json());
 
 // Routes
 app.use("/api/pricing", pricingRoutes);
 app.use("/api/routes", routeRoutes);
+
+// Also support non-api paths
+app.use("/pricing", pricingRoutes);
+app.use("/routes", routeRoutes);
+
+/* =========================================================
+   ADMIN LOGIN API
+========================================================= */
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
+    if (username !== process.env.ADMIN_USERNAME || password !== process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ admin: true }, process.env.JWT_SECRET, { expiresIn: "24h" });
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+// Also support frontend specific path
+app.post("/admin/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
+    if (username !== process.env.ADMIN_USERNAME || password !== process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ admin: true }, process.env.JWT_SECRET, { expiresIn: "24h" });
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+/*
+// Also support frontend path
+app.post("/Droptaxi-frontend/admin/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
+    if (username !== process.env.ADMIN_USERNAME || password !== process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ admin: true }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+*/
 
 /* =========================================================
    FARE CALCULATION API
@@ -258,6 +323,7 @@ app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
   console.log("✅ Pricing API aligned");
   console.log("✅ Routes API aligned");
+  console.log("✅ Admin API secured");
   console.log("✅ Booking API ready");
   console.log("✅ Distance API ready");
 });

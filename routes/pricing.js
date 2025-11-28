@@ -1,21 +1,11 @@
 import express from "express";
 const router = express.Router();
 import Pricing from "../models/Pricing.js";
+import verifyAdmin from "../utils/verifyAdmin.js";
 
-// Admin authentication middleware (TODO: Implement proper JWT authentication)
-const requireAdmin = (req, res, next) => {
-  // For now, skip authentication - TODO: Add proper admin check
-  // const token = req.headers.authorization;
-  // if (!token) {
-  //   return res.status(401).json({ error: 'Authentication required' });
-  // }
-  // Verify token and check admin role
-  next();
-};
-
-// GET all pricing configurations (admin only)
+// GET all pricing configurations
 // Transforms DB format to frontend format
-router.get("/", requireAdmin, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const pricings = await Pricing.find({}, { createdAt: 0, updatedAt: 0, __v: 0 });
 
@@ -36,9 +26,13 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 // GET pricing by category (admin only)
-router.get("/:category", requireAdmin, async (req, res) => {
+router.get("/by-category", verifyAdmin, async (req, res) => {
   try {
-    const pricing = await Pricing.findOne({ category: req.params.category });
+    const { category } = req.query;
+    if (!category) {
+      return res.status(400).json({ error: "Category required" });
+    }
+    const pricing = await Pricing.findOne({ category });
     if (!pricing) {
       return res.status(404).json({ error: "Pricing not found" });
     }
@@ -48,9 +42,9 @@ router.get("/:category", requireAdmin, async (req, res) => {
   }
 });
 
-// UPDATE pricing (expects array of frontend format pricing objects) (admin only)
+// UPDATE pricing (expects array of frontend format pricing objects)
 // Transforms frontend format to DB format
-router.put("/", requireAdmin, async (req, res) => {
+router.put("/", async (req, res) => {
   try {
     const frontendPricingData = req.body;
 
