@@ -46,7 +46,7 @@ router.get("/by-id", async (req, res) => {
 
 // CREATE new route
 // Accepts frontend format { from, to, time, price, distance }
-router.post("/", async (req, res) => {
+router.post("/", verifyAdmin, async (req, res) => {
   try {
     const { from, to, time, price, distance } = req.body;
 
@@ -77,13 +77,14 @@ router.post("/", async (req, res) => {
 });
 
 // UPDATE route
-// Accepts frontend format { id, from, to, time, price, distance }
-router.put("/update", async (req, res) => {
+// Accepts frontend format { from, to, time, price, distance }
+router.put("/:id", verifyAdmin, async (req, res) => {
   try {
-    const { id, from, to, time, price, distance } = req.body;
+    const { id } = req.params;
+    const { from, to, time, price, distance } = req.body;
 
-    if (!id || !from || !to || !distance || typeof price !== 'number') {
-      return res.status(400).json({ error: "id, from, to, time, price, and distance are required" });
+    if (!from || !to || !distance || typeof price !== 'number') {
+      return res.status(400).json({ error: "from, to, time, price, and distance are required" });
     }
 
     // Transform to DB format
@@ -117,12 +118,9 @@ router.put("/update", async (req, res) => {
 });
 
 // DELETE route
-router.delete("/delete", async (req, res) => {
+router.delete("/:id", verifyAdmin, async (req, res) => {
   try {
-    const { id } = req.query;
-    if (!id) {
-      return res.status(400).json({ error: "Id required" });
-    }
+    const { id } = req.params;
     const deletedRoute = await Route.findByIdAndDelete(id);
     if (!deletedRoute) {
       return res.status(404).json({ error: "Route not found" });

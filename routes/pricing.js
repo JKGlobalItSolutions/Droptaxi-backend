@@ -44,7 +44,7 @@ router.get("/by-category", verifyAdmin, async (req, res) => {
 
 // UPDATE pricing (expects array of frontend format pricing objects)
 // Transforms frontend format to DB format
-router.put("/", async (req, res) => {
+router.put("/", verifyAdmin, async (req, res) => {
   try {
     const frontendPricingData = req.body;
 

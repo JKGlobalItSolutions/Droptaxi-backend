@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import Pricing from "./models/Pricing.js";
 import Route from "./models/Route.js";
+import Admin from "./models/Admin.js";
 
 dotenv.config();
 
@@ -109,6 +110,16 @@ const seedData = async () => {
         faresPerCategory: { sedan: 1200, premiumSedan: 1400, suv: 1600, premiumSuv: 1800 }
       }
     ];
+
+    // Seed admin
+    await Admin.deleteMany();
+
+    const admin = new Admin({
+      username: "admin",
+      password: "admin123"
+    });
+
+    await admin.save();
 
     await Route.insertMany(routes);
 

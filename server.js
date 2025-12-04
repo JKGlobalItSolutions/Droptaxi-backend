@@ -10,7 +10,7 @@ import routeRoutes from "./routes/routes.js";
 import verifyAdmin from "./utils/verifyAdmin.js";
 
 dotenv.config();
-// connectDB(); // Temporarily commented out for login testing
+connectDB();
 
 const app = express();
 
