@@ -16,7 +16,10 @@ const app = express();
 
 // CORS
 const allowedOrigins = [
-  "https://jkglobalitsolutions.github.io"
+  "https://jkglobalitsolutions.github.io",
+  "https://JKGlobalItSolutions.github.io/Droptaxi-frontend",
+  "http://localhost:3000",
+  "http://localhost:5173"
 ];
 
 app.use((req, res, next) => {
