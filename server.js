@@ -86,7 +86,7 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-/*
+
 // Also support frontend path
 app.post("/Droptaxi-frontend/admin/login", async (req, res) => {
   try {
@@ -106,7 +106,7 @@ app.post("/Droptaxi-frontend/admin/login", async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 });
-*/
+
 
 /* =========================================================
    FARE CALCULATION API
