@@ -82,3 +82,32 @@ router.put("/", verifyAdmin, async (req, res) => {
 });
 
 export default router;
+router.put('/', async (req, res) => {
+  try {
+    const pricingData = req.body;
+    
+    if (!Array.isArray(pricingData) || pricingData.length === 0) {
+      return res.status(400).json({ message: 'Invalid pricing data' });
+    }
+
+    // Validate each item
+    for (const item of pricingData) {
+      if (!item.type || typeof item.rate !== 'number' || typeof item.fixedPrice !== 'number') {
+        return res.status(400).json({ message: 'Invalid data format' });
+      }
+      if (item.rate < 0 || item.fixedPrice < 0) {
+        return res.status(400).json({ message: 'Pricing values cannot be negative' });
+      }
+    }
+
+    // Update database (assuming Pricing model exists)
+    await Pricing.deleteMany({});
+    await Pricing.insertMany(pricingData);
+
+    res.json(pricingData);
+  } catch (error) {
+    console.error('Pricing update error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+

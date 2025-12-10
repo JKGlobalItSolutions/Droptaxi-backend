@@ -7,7 +7,6 @@ import jwt from "jsonwebtoken";
 import connectDB from "./config/db.js";
 import pricingRoutes from "./routes/pricing.js";
 import routeRoutes from "./routes/routes.js";
-import adminRoutes from "./routes/admin\.js";
 import adminRoutes from "./routes/admin.js";
 import verifyAdmin from "./utils/verifyAdmin.js";
 
@@ -47,7 +46,7 @@ app.use("/api/routes", routeRoutes);
 
 // Also support non-api paths
 app.use("/pricing", pricingRoutes);
-app.use("/routes", routeRoutes);app.use(adminRoutes);
+app.use("/routes", routeRoutes);
 app.use(adminRoutes);
 
 /* =========================================================
@@ -333,5 +332,3 @@ app.listen(PORT, () => {
   console.log("✅ Booking API ready");
   console.log("✅ Distance API ready");
 });
-
-
