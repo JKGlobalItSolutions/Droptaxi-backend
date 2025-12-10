@@ -24,7 +24,7 @@ const pricingSchema = new Schema({
   },
   baseFare: {
     type: Number,
-    require: true,
+    required: true,
     default: 0
   }
 });
