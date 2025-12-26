@@ -21,7 +21,7 @@ const allowedOrigins = [
   "https://JKGlobalItSolutions.github.io/Droptaxi-frontend",
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://localhost:8080"
+  "https://www.selvendhiradroptaxi.com"
 ];
 
 app.use((req, res, next) => {
